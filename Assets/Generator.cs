@@ -7,9 +7,6 @@ public class Generator : MonoBehaviour
     [SerializeField]
     private string type = string.Empty;
 
-    [SerializeField]
-    private uint minimum = uint.MinValue;
-
     [SerializeField] 
     private uint current = uint.MaxValue;
 
