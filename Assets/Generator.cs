@@ -16,6 +16,19 @@ public class Generator : MonoBehaviour
     [SerializeField]
     private bool working = true;
 
+    public Generator (string resourceType, uint cur, uint breakChanceVal, bool isWorking)
+    {
+        SetValues(resourceType, cur, breakChanceVal, isWorking);
+    }
+
+    public void SetValues(string resourceType, uint cur, uint breakChanceVal, bool isWorking)
+    {
+        type = resourceType;
+        current = cur;
+        breakChance = breakChanceVal;
+        working = isWorking;
+    }
+
     public string UnsafeGiveResource()
     {
         if (working)
