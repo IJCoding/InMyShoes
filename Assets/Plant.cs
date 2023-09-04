@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,26 +14,31 @@ public class Plant : MonoBehaviour
     private Generator resourceGenerator = null;
 
     [SerializeField]
-    private uint hunger = uint.MaxValue;
+    private uint hunger = 10;
 
     [SerializeField]
     private uint hungerMax = uint.MaxValue;
 
     [SerializeField]
-    private uint size = uint.MinValue + 1;
+    private uint size = 1;
 
     [SerializeField]
-    private uint gather = uint.MinValue + 1;
+    private uint gather = 2;
 
     [SerializeField]
-    private uint sizeChance = uint.MinValue +1;
+    private uint population = 1;
 
     [SerializeField]
-    private uint gatherChance = uint.MinValue +1;
+    private uint sizeChance = 1;
 
     [SerializeField]
-    private uint cloneChance = uint.MinValue + 1;
+    private uint gatherChance = 1;
 
+    [SerializeField]
+    private uint cloneChance = 1;
+
+    [SerializeField]
+    private float time = 2;
 
     private void Awake()
     {
@@ -41,13 +47,62 @@ public class Plant : MonoBehaviour
         else { resourceGenerator = gen.GetComponent<Generator>(); }
     }
 
+    public string GetName()
+    {
+        return "G: " + gather.ToString() + ", S: " + size.ToString() + ", P: " + population.ToString();
+    }
+
     private void Update()
     {
-        hunger -= size;
+        time -= Time.deltaTime;
 
-        Eat();
+        if (time < 0)
+        {
+            this.name = GetName();
 
-        if (hunger >= (size * 10)) Grow();
+            for (uint i = population; i > 0; i--)
+            {
+                if (hunger > size)
+                {
+                    hunger -= size;
+
+                    Eat();
+                    if (hunger >= (size * 10)) Grow();
+
+                    uint reproChance = (uint)UnityEngine.Random.Range(0, sizeChance + gatherChance + cloneChance);
+
+                    if (reproChance < sizeChance)
+                    {
+                        Eat();
+                    }
+                    else if (reproChance < sizeChance + gatherChance)
+                    {
+                        Eat();
+                    }
+                    else
+                    {
+                        population += 1;
+                    }
+                }
+                else 
+                {
+                    if(population >2) population--;
+                    if (size >2) size--; 
+                    if (gather >2) gather--;
+                    if (sizeChance >2) sizeChance--;
+                    if (gatherChance >2) gatherChance--;
+                    if (cloneChance >2) cloneChance--;
+                }
+            }
+
+            if(hunger > size *10)
+            {
+                population++;
+                hunger = size * 10;
+            }
+
+            time = 2;
+        }
 
     }
 
@@ -60,6 +115,10 @@ public class Plant : MonoBehaviour
         }
     }
 
+    public void AdjustPopulation(uint amount)
+    {
+        population += amount;
+    }
 
     private void Grow()
     {
@@ -79,6 +138,16 @@ public class Plant : MonoBehaviour
         {
             GameObject clone = this.gameObject;
             Instantiate(clone);
+
+            if(GameObject.Find(clone.gameObject.GetComponent<Plant>().GetName()))
+            {
+                var other = GameObject.Find(GetName());
+
+                other.gameObject.GetComponent<Plant>().AdjustPopulation(1);
+
+                Destroy(clone.gameObject);
+            }
+
         }
     }
 }
